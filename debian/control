@@ -1,0 +1,26 @@
+Source: cliamp
+Section: sound
+Priority: optional
+Maintainer: Dario Griffo <dariogriffo@gmail.com>
+Build-Depends: debhelper-compat (= 13), wget, ca-certificates, libasound2t64 | libasound2
+Standards-Version: 4.6.2
+Homepage: https://github.com/bjarneo/cliamp
+Rules-Requires-Root: no
+
+Package: cliamp
+Architecture: amd64 arm64
+Depends: ${misc:Depends}, libc6 (>= 2.34), libasound2t64 | libasound2
+Recommends: ffmpeg
+Suggests: yt-dlp
+Description: retro terminal music player inspired by Winamp 2.x
+ cliamp is a terminal music player with a Winamp-inspired interface: a
+ playlist editor, a graphic equaliser, dozens of visualisers and a large
+ collection of themes, all rendered in the terminal.
+ .
+ It plays local files (MP3, FLAC, OGG, WAV) and internet radio, and can
+ stream from Spotify, Qobuz, Navidrome, Jellyfin, Emby, Plex, SoundCloud,
+ NetEase and YouTube Music. A headless daemon mode exposes playback over
+ IPC for scripts, Waybar and other status bars, and playback can be
+ extended with sandboxed Lua plugins.
+ .
+ The command provided by this package is "cliamp".

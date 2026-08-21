@@ -1,0 +1,187 @@
+.TH CLIAMP 1 "2026" "cliamp" "User Commands"
+.SH NAME
+cliamp \- retro terminal music player inspired by Winamp 2.x
+.SH SYNOPSIS
+.B cliamp
+[\fIGLOBAL OPTIONS\fR] [\fICOMMAND\fR [\fICOMMAND OPTIONS\fR]] [\fIFILE\fR|\fIURL\fR...]
+.SH DESCRIPTION
+.B cliamp
+is a terminal music player with a Winamp\-inspired interface: a playlist
+editor, a graphic equaliser, dozens of visualisers and a large collection of
+themes, all rendered in the terminal.
+.PP
+It plays local files (MP3, FLAC, OGG, WAV) and internet radio, and can stream
+from Spotify, Qobuz, Navidrome, Jellyfin, Emby, Plex, SoundCloud, NetEase and
+YouTube Music.
+.PP
+Run without arguments to start the interactive TUI. Run with a command to
+control an already running instance over its IPC socket, which makes cliamp
+scriptable from status bars such as Waybar.
+.SH GLOBAL OPTIONS
+.TP
+.B \-\-vol \fIfloat\fR
+Startup volume in dB, within [\-30, +6] (default: 0).
+.TP
+.B \-\-shuffle
+Shuffle playback.
+.TP
+.B \-\-repeat \fImode\fR
+Repeat mode: \fBoff\fR, \fBall\fR or \fBone\fR.
+.TP
+.B \-\-mono\fR, \fB\-\-no\-mono
+Enable or disable mono output.
+.TP
+.B \-\-auto\-play
+Start playback immediately.
+.TP
+.B \-\-compact
+Compact mode (80 columns).
+.TP
+.B \-\-provider \fIname\fR
+Default provider: radio, navidrome, plex, jellyfin, emby, spotify, qobuz,
+soundcloud, netease, yt, youtube, ytmusic.
+.TP
+.B \-\-start\-theme \fIname\fR
+UI theme to start with.
+.TP
+.B \-\-visualizer \fImode\fR
+Visualizer mode.
+.TP
+.B \-\-eq\-preset \fIname\fR
+Equaliser preset name.
+.TP
+.B \-\-sample\-rate \fIhz\fR
+Output sample rate in Hz (0 = auto).
+.TP
+.B \-\-buffer\-ms \fIms\fR
+Speaker buffer in milliseconds (50\-5000).
+.TP
+.B \-\-resample\-quality \fIn\fR
+Resample quality factor (1\-4).
+.TP
+.B \-\-bit\-depth \fIn\fR
+PCM bit depth: 16 or 32.
+.TP
+.B \-\-audio\-device \fIname\fR
+Audio output device; use \fBlist\fR to show the available devices.
+.TP
+.B \-\-playlist \fIname\fR
+Load a local TOML playlist by name and start playing.
+.TP
+.B \-\-log\-level \fIlevel\fR
+Log level: debug, info, warn, error.
+.TP
+.B \-\-expand\-playlist\fR, \fB\-\-no\-expand\-playlist
+Enable or disable expansion of YouTube Music playlists from list= URLs.
+.TP
+.B \-\-low\-power
+Low\-power mode: reduce CPU usage by lowering the UI cadence and disabling
+visualisation.
+.TP
+.B \-\-daemon\fR, \fB\-d
+Run headless (no TUI), serving IPC for scripts and status bars.
+.TP
+.B \-\-help\fR, \fB\-h
+Show help.
+.TP
+.B \-\-version\fR, \fB\-v
+Print the version.
+.SH COMMANDS
+.SS Playback control
+.TP
+.B play\fR, \fBpause\fR, \fBtoggle\fR, \fBstop
+Resume, pause, toggle or stop playback.
+.TP
+.B next\fR, \fBprev
+Skip to the next or previous track.
+.TP
+.B status
+Show the current playback state.
+.TP
+.B volume \fIdB\fR
+Adjust the volume in dB.
+.TP
+.B seek \fIseconds\fR
+Seek to a position in seconds.
+.TP
+.B speed \fIfactor\fR
+Set the playback speed (0.25\-2.0).
+.TP
+.B shuffle\fR, \fBrepeat\fR, \fBmono
+Toggle or set shuffle, repeat mode and mono output.
+.TP
+.B eq \fIpreset\fR|\fIband value\fR
+Set an equaliser preset or an individual band.
+.TP
+.B device \fIname\fR
+Switch the audio output device.
+.SS Library and queue
+.TP
+.B load \fIplaylist\fR
+Load a playlist into the player.
+.TP
+.B queue \fItrack\fR
+Queue a track for playback.
+.TP
+.B playlist
+Manage local playlists.
+.TP
+.B history
+Show recently played tracks.
+.SS Appearance
+.TP
+.B theme \fR[\fIname\fR]
+Set or list UI themes.
+.TP
+.B vis \fR[\fImode\fR]
+Set or list visualizer modes.
+.TP
+.B visstream
+Stream visualizer bands as NDJSON, one frame per line.
+.SS Integrations and maintenance
+.TP
+.B setup
+Interactive wizard to configure remote providers.
+.TP
+.B spotify\fR, \fBqobuz
+Manage the Spotify and Qobuz integrations.
+.TP
+.B plugins
+Manage Lua plugins.
+.TP
+.B upgrade
+Upgrade cliamp to the latest release. On Debian and Ubuntu, prefer
+.BR apt (8)
+so the package manager stays in charge of the installed files.
+.TP
+.B help\fR, \fBh
+Show a list of commands, or help for one command.
+.SH FILES
+.TP
+.I ~/.config/cliamp/config.toml
+User configuration file.
+.SH ENVIRONMENT
+.TP
+.B XDG_CONFIG_HOME
+Overrides the location of the configuration directory.
+.SH SEE ALSO
+.BR ffmpeg (1),
+.BR yt\-dlp (1)
+.PP
+Full documentation is available at
+.UR https://github.com/bjarneo/cliamp
+.UE
+and
+.UR http://www.cliamp.stream
+.UE .
+.SH BUGS
+Report bugs in cliamp itself at
+.UR https://github.com/bjarneo/cliamp/issues
+.UE .
+Report packaging bugs at
+.UR https://github.com/dariogriffo/cliamp-debian/issues
+.UE .
+.SH AUTHOR
+cliamp was written by Bjarne Øverli.
+.PP
+This manual page was written for the Debian packaging of cliamp.

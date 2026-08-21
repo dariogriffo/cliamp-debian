@@ -1,0 +1,9 @@
+cliamp (FULL_VERSION) DIST; urgency=low
+
+  * New upstream release.
+
+  cliamp generates its release notes from the upstream commit log, so the
+  changelog for this and every other version is published together with the
+  release itself at https://github.com/bjarneo/cliamp/releases
+
+ -- Dario Griffo <dariogriffo@gmail.com>  Fri, 21 Aug 2026 00:00:00 +0000

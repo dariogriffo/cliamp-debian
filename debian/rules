@@ -1,0 +1,76 @@
+#!/usr/bin/make -f
+DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+CLIAMP_VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/[-~].*//')
+UPSTREAM := https://github.com/bjarneo/cliamp/releases/download/v$(CLIAMP_VERSION)
+B := debian/build
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+
+# Upstream tags carry a "v" prefix and the release assets are bare binaries,
+# not tarballs. Only linux/amd64 and linux/arm64 are published; both are cgo
+# builds that link libasound dynamically and need GLIBC_2.34 at most, so they
+# run on every suite we target. The desktop entry and the icon are taken from
+# the source tarball, so they always match the packaged release.
+override_dh_auto_build:
+	@mkdir -p $(B)
+	@case "$(DEB_HOST_ARCH)" in \
+		amd64|arm64) ;; \
+		*) echo "Unsupported architecture: $(DEB_HOST_ARCH)"; exit 1 ;; \
+	esac
+	echo "Downloading cliamp-linux-$(DEB_HOST_ARCH) for v$(CLIAMP_VERSION)..."
+	wget -q "$(UPSTREAM)/cliamp-linux-$(DEB_HOST_ARCH)" -O $(B)/cliamp
+	chmod +x $(B)/cliamp
+# The completion scripts are plain shell templates and are identical on every
+# architecture, but they can only be produced by running the binary -- so when
+# cross building, fetch the build machine's own architecture to generate them.
+# Generating them needs libasound at runtime, hence the ALSA build dependency.
+# Fish is skipped: the upstream CLI library renders a broken fish template
+# (literal "%!(BADWIDTH)" markers), so shipping it would only break fish.
+	@mkdir -p $(B)/completions; \
+	gen="$(B)/cliamp"; \
+	if [ "$(DEB_HOST_ARCH)" != "$(DEB_BUILD_ARCH)" ]; then \
+		case "$(DEB_BUILD_ARCH)" in \
+			amd64|arm64) \
+				echo "Cross build: fetching cliamp-linux-$(DEB_BUILD_ARCH) to generate completions"; \
+				wget -q "$(UPSTREAM)/cliamp-linux-$(DEB_BUILD_ARCH)" -O $(B)/cliamp-gen; \
+				chmod +x $(B)/cliamp-gen; \
+				gen="$(B)/cliamp-gen" ;; \
+			*) echo "Cross build from $(DEB_BUILD_ARCH): cannot generate completions"; exit 1 ;; \
+		esac; \
+	fi; \
+	"./$$gen" completion bash > $(B)/completions/cliamp.bash; \
+	"./$$gen" completion zsh  > $(B)/completions/_cliamp; \
+	[ -s $(B)/completions/cliamp.bash ] && [ -s $(B)/completions/_cliamp ]
+
+override_dh_auto_install:
+	install -D -m 755 $(B)/cliamp debian/cliamp/usr/bin/cliamp
+	install -D -m 644 debian/cliamp.1 debian/cliamp/usr/share/man/man1/cliamp.1
+	install -D -m 644 cliamp.desktop debian/cliamp/usr/share/applications/cliamp.desktop
+	install -D -m 644 Cliamp.png debian/cliamp/usr/share/icons/hicolor/512x512/apps/cliamp.png
+	install -d debian/cliamp/usr/share/pixmaps
+	ln -sf ../icons/hicolor/512x512/apps/cliamp.png debian/cliamp/usr/share/pixmaps/cliamp.png
+	install -D -m 644 $(B)/completions/cliamp.bash debian/cliamp/usr/share/bash-completion/completions/cliamp
+	install -D -m 644 $(B)/completions/_cliamp debian/cliamp/usr/share/zsh/vendor-completions/_cliamp
+
+override_dh_auto_test:
+
+# docs/history.md documents the "recently played" feature, but its name makes
+# dh_installchangelogs mistake it for an upstream changelog. Upstream ships no
+# changelog at all -- the release notes live on the GitHub releases page -- so
+# only the Debian changelog is installed.
+override_dh_installchangelogs:
+	dh_installchangelogs -Xhistory.md
+
+override_dh_auto_clean:
+	rm -rf $(B)
+
+# The binary is a prebuilt upstream release: leave it exactly as published and
+# do not try to derive library dependencies from it (they are declared by hand
+# in debian/control).
+override_dh_strip:
+
+override_dh_shlibdeps:
