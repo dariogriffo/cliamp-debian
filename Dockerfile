@@ -1,7 +1,5 @@
-ARG DEBIAN_DIST=bookworm
-FROM debian:$DEBIAN_DIST
+FROM debian:bookworm
 
-ARG DEBIAN_DIST
 ARG cliamp_VERSION
 ARG BUILD_VERSION
 ARG FULL_VERSION
@@ -47,14 +45,12 @@ RUN find /output/usr -type d -exec chmod 755 {} + \
  && find /output/usr -type f -exec chmod 644 {} + \
  && chmod 755 /output/usr/bin/cliamp
 
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/usr/share/doc/cliamp/changelog.Debian
 # FULL_VERSION carries the architecture suffix used for the .deb filename;
 # the changelog must show the package version instead.
-RUN sed -i "s/FULL_VERSION/${cliamp_VERSION}-${BUILD_VERSION}~${DEBIAN_DIST}/" /output/usr/share/doc/cliamp/changelog.Debian
+RUN sed -i "s/FULL_VERSION/${cliamp_VERSION}-${BUILD_VERSION}~griffo/" /output/usr/share/doc/cliamp/changelog.Debian
 RUN gzip -9n /output/usr/share/doc/cliamp/changelog.Debian
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/control
 RUN sed -i "s/cliamp_VERSION/$cliamp_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/SUPPORTED_ARCHITECTURES/$ARCH/" /output/DEBIAN/control
 
-RUN dpkg-deb --build /output /cliamp_${FULL_VERSION}.deb
+RUN dpkg-deb -Zxz --build /output /cliamp_${FULL_VERSION}.deb

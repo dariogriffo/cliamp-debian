@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Dario Griffo <dariogriffo@gmail.com>
 Homepage: https://github.com/bjarneo/cliamp
 Package: cliamp
-Version: cliamp_VERSION-BUILD_VERSION~DIST
+Version: cliamp_VERSION-BUILD_VERSION~griffo
 Architecture: SUPPORTED_ARCHITECTURES
 Depends: libc6 (>= 2.34), libasound2t64 | libasound2
 Recommends: ffmpeg

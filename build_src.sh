@@ -14,7 +14,21 @@ PACKAGE_NAME="cliamp"
 ORIG_TARBALL="${PACKAGE_NAME}_${cliamp_VERSION}.orig.tar.gz"
 BUILD_DIR="${PACKAGE_NAME}-${cliamp_VERSION}"
 
-echo "Creating Debian/Ubuntu source packages for cliamp ${cliamp_VERSION}-${BUILD_VERSION}..."
+echo "Creating the source package for cliamp ${cliamp_VERSION}-${BUILD_VERSION}..."
+
+# A rebuild of an upstream version already released here (a +N build bump)
+# must ship the very same orig tarball: the pool holds one per upstream
+# version and reprepro refuses a different one, and nothing guarantees the
+# archive download is byte-identical next time. Reuse the earlier release's copy.
+if [ ! -f "$ORIG_TARBALL" ]; then
+    for ((b = BUILD_VERSION - 1; b >= 1; b--)); do
+        if wget -q "https://github.com/dariogriffo/cliamp-debian/releases/download/${cliamp_VERSION}%2B${b}/${ORIG_TARBALL}" -O "$ORIG_TARBALL"; then
+            echo "  Reusing $ORIG_TARBALL from release ${cliamp_VERSION}+${b}"
+            break
+        fi
+        rm -f "$ORIG_TARBALL"
+    done
+fi
 
 # Download upstream source tarball (shared .orig.tar.gz across all distributions).
 # Upstream tags carry a "v" prefix, but the GitHub archive strips it and already
@@ -28,10 +42,9 @@ else
 fi
 
 build_source_package() {
-    local dist=$1
-    local FULL_VERSION="${cliamp_VERSION}-${BUILD_VERSION}~${dist}"
+    local FULL_VERSION="${cliamp_VERSION}-${BUILD_VERSION}~griffo"
 
-    echo "  Building source package for ${dist} (${FULL_VERSION})..."
+    echo "  Building source package ${FULL_VERSION}..."
 
     # Clean and recreate build directory from orig tarball
     rm -rf "$BUILD_DIR"
@@ -41,9 +54,9 @@ build_source_package() {
     # Copy Debian packaging directory
     cp -r debian "$BUILD_DIR/"
 
-    # Generate distribution-specific changelog (overwrites placeholder)
+    # Generate the changelog (overwrites placeholder)
     cat > "$BUILD_DIR/debian/changelog" << EOC
-cliamp (${FULL_VERSION}) ${dist}; urgency=medium
+cliamp (${FULL_VERSION}) stable; urgency=medium
 
   * New upstream release ${cliamp_VERSION}.
 
@@ -58,18 +71,8 @@ EOC
 }
 
 echo ""
-echo "Building Debian source packages..."
-DEBIAN_DISTS=("bookworm" "trixie" "forky" "sid")
-for dist in "${DEBIAN_DISTS[@]}"; do
-    build_source_package "$dist"
-done
-
-echo ""
-echo "Building Ubuntu source packages..."
-UBUNTU_DISTS=("jammy" "noble" "questing" "resolute")
-for dist in "${UBUNTU_DISTS[@]}"; do
-    build_source_package "$dist"
-done
+# One source package for every suite, as with the binaries (see build_debian.sh).
+build_source_package
 
 echo ""
 echo "Source packages created successfully!"

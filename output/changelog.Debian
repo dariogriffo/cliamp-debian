@@ -1,4 +1,4 @@
-cliamp (FULL_VERSION) DIST; urgency=low
+cliamp (FULL_VERSION) stable; urgency=low
 
   * New upstream release.
 
